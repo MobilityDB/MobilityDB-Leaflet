@@ -4,7 +4,7 @@ import LVectorGrid from "./components/LVectorGrid";
 
 function App() {
   return (
-    <div>
+    <div className={'App'}>
       <LVectorGrid />
     </div>
   );

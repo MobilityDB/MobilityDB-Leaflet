@@ -7,7 +7,7 @@ export default function LVectorGrid() {
 
   useEffect(() => {
     // create a Leaflet map instance
-    const map = L.map(mapRef.current).setView([51.505, 4], 13);
+    const map = L.map(mapRef.current).setView([50.5, 4], 8);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
             maxZoom: 18,
@@ -37,5 +37,5 @@ export default function LVectorGrid() {
     };
   }, []);
 
-  return <div ref={mapRef} style={{ height: "300px" }}></div>;
+  return <div ref={mapRef} style={{ height: "100%", position: "relative" }}></div>;
 };
