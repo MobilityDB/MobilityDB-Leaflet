@@ -3,3 +3,14 @@
   height: 100%;
   position: absolute;
 }
+
+.notransition * {
+  animation: none !important;
+  transition: none !important;
+  -moz-animation: none !important;
+  -moz-transition: none !important;
+  -webkit-animation: none !important;
+  -webkit-transition: none !important;
+  -o-animation: none !important;
+  -o-transition: none !important;
+}
