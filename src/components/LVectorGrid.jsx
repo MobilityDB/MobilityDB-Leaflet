@@ -11,6 +11,9 @@ export default function LVectorGrid() {
   const [limit, setLimit] = useState(100)
   const [currentTime, setCurrentTime] = useState(Date.now())
   const [fps, setFps] = useState(0)
+  const [startTime, setStartTime] = useState(Date.now())
+  const [averageFps, setAverageFps] = useState(0)
+  const [updateCount, setUpdateCount] = useState(0)
 
   useEffect(() => {
     const map = L.map("map").setView([50.5, 4], 8);
@@ -68,6 +71,7 @@ export default function LVectorGrid() {
     const now = Date.now()
     setFps(Math.round(1000/(now-currentTime)))
     setCurrentTime(now)
+    setUpdateCount((updateCount)=>updateCount+1)
     setInterval(()=> {tmp.remove()}, 500)
     if (updateTime) updateTimez()
   }
@@ -100,9 +104,19 @@ export default function LVectorGrid() {
 
   useEffect(() => {
     if (startSimulation) {
+      setAverageFps(Math.round(updateCount/(Date.now()-startTime)*1000))
       extracted(true, vectorTileLayer);
     }
   }, [timez, startSimulation, limit, vectorTileLayer]);
+
+  useEffect(() => {
+    if (startSimulation) {
+      setUpdateCount(0)
+      setStartTime(Date.now())
+    } else {
+      setAverageFps(Math.round(updateCount/(Date.now()-startTime)*1000))
+    }
+  }, [startSimulation]);
 
   useEffect(() => {
     if (vectorTileLayer) {
@@ -122,6 +136,7 @@ export default function LVectorGrid() {
       <input type='number' value={limit} onChange={(e)=>setLimit(e.target.value)}/>
       <div>{timez}</div>
       <div>{fps}</div>
+      <div>Average fps: {averageFps}</div>
     </div>
   );
 }
