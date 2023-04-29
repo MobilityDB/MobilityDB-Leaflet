@@ -14,6 +14,7 @@ export default function LVectorGrid() {
   const [startTime, setStartTime] = useState(Date.now())
   const [averageFps, setAverageFps] = useState(0)
   const [updateCount, setUpdateCount] = useState(0)
+  const [intervalTime, setIntervalTime] = useState(null)
 
   useEffect(() => {
     const map = L.map("map").setView([50.5, 4], 8);
@@ -27,7 +28,7 @@ export default function LVectorGrid() {
     mapRef.current = map;
 
     const newLayer = L.vectorGrid.protobuf(
-      `http://192.168.0.171:7802/public.get_reduced_tilelayer/{z}/{x}/{y}.pbf?maxpoints=${limit}&timez=${timez}`,
+      `http://192.168.0.171:8000/vectorTiles/{z}/{x}/{y}?limit=${limit}&timez=${timez}`,
       {
         opacity: 1,
         rendererFactory: L.svg.tile,
@@ -66,21 +67,39 @@ export default function LVectorGrid() {
     });
   }
 
+  useEffect(() => {
+    const UPDATE_PER_SECOND = 15;
+    if (startSimulation) {
+      const interval = setInterval(() => {
+          updateTimez();
+        }, 1000/UPDATE_PER_SECOND);
+      if (intervalTime) {
+        clearInterval(intervalTime);
+      }
+        setIntervalTime(interval);
+    } else {
+      clearInterval(intervalTime)
+    }
+    }
+      , [startSimulation]);
+
   async function removeLayer(tmp, updateTime) {
-    console.log('remove layer')
     const now = Date.now()
     setFps(Math.round(1000/(now-currentTime)))
     setCurrentTime(now)
     setUpdateCount((updateCount)=>updateCount+1)
     setInterval(()=> {tmp.remove()}, 500)
-    if (updateTime) updateTimez()
   }
 
   async function extracted(updateTime = true, vectorTileLayer) {
     if (!vectorTileLayer.isLoading()){
     const newLayer = L.vectorGrid.protobuf(
-      `http://192.168.0.171:7802/public.get_reduced_tilelayer/{z}/{x}/{y}.pbf?maxpoints=${limit}&timez=${timez}`,
+      `http://192.168.0.171:8000/vectorTiles/{z}/{x}/{y}?limit=${limit}&timez=${timez}`,
       {
+        updateWhenIdle: false,
+        updateWhenZooming: false,
+        bounds: L.latLngBounds(L.latLng(49.5, 2.5), L.latLng(51.51, 6.4)),
+        tileSize: 256,
         opacity: 1,
         rendererFactory: L.canvas.tile,
         vectorTileLayerStyles: {
