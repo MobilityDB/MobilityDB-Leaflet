@@ -1,0 +1,29 @@
+body {
+  margin: 0;
+}
+
+* {
+  animation: none !important;
+  transition: none !important;
+  -moz-animation: none !important;
+  -moz-transition: none !important;
+  -webkit-animation: none !important;
+  -webkit-transition: none !important;
+  -o-animation: none !important;
+  -o-transition: none !important;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.leaflet-tile {
+   opacity: 100 !important;
+   visibility: visible !important;
+}
+
+.leaflet-tile-container {
+   opacity: 100 !important;
+   visibility: visible !important;
+}
