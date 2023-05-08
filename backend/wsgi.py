@@ -5,6 +5,7 @@ from fastapi import FastAPI, Response
 import psycopg2
 import os
 from dotenv import load_dotenv
+import json
 
 
 load_dotenv()
@@ -28,10 +29,8 @@ async def root():
 @app.get("/vectorTiles/{z}/{x}/{y}")
 async def get_vector_tiles(z, x, y, limit=100, timez='1970-01-01 7:00:00'):
     cur = con.cursor()
-    t = time.time()
     cur.execute("select get_reduced_tilelayer(%s, %s, %s, %s, %s)", (z, x, y, limit, timez))
     asmvt = cur.fetchone()[0]
-    print(time.time() - t)
     cur.close()
 
     if asmvt is not None:
@@ -48,3 +47,14 @@ async def get_vector_tiles(z, x, y, limit=100, timez='1970-01-01 7:00:00'):
         return Response(content=asmvt_bytes, headers=headers)
     else:
         return Response(content="No data found for this tile", status_code=404)
+
+@app.get("/geojson")
+async def get_geojson(limit=100, timez='1970-01-01 7:00:00'):
+    cur = con.cursor()
+    t = time.time()
+    cur.execute("select get_geojson_tilelayer(%s, %s)", (limit, timez))
+    geojson = cur.fetchone()[0]
+    cur.close()
+
+    ## send geojson as response
+    return Response(content=json.dumps(geojson), headers={"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"})
