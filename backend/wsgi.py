@@ -27,7 +27,33 @@ async def root():
 
 
 @app.get("/vectorTiles/{z}/{x}/{y}")
-async def get_vector_tiles(z, x, y, limit=100, timez='1970-01-01 7:00:00'):
+async def get_vector_tiles(z, x, y, limit=100):
+    cur = con.cursor()
+    t = time.time()
+    cur.execute("select get_reduced_tilelayer_new(%s, %s, %s, %s)", (z, x, y, limit))
+    asmvt = cur.fetchone()[0]
+    cur.close()
+    print(time.time() - t)
+    if asmvt is not None:
+        # Convert memoryview to bytes
+        asmvt_bytes = asmvt.tobytes()
+
+        # Set the content type and headers
+        headers = {
+            "Content-Type": "application/vnd.mapbox-vector-tile",
+            "Access-Control-Allow-Origin": "*"
+        }
+        response = Response(content=asmvt_bytes, headers=headers)
+        print('global time: ', time.time() - t)
+        # Return the ASMVT byte string as a response with headers
+        return response
+    else:
+        return Response(content="No data found for this tile", status_code=404)
+
+
+
+@app.get("/vectorTiles/{z}/{x}/{y}")
+async def get_vector_tiles_old(z, x, y, limit=100, timez='1970-01-01 7:00:00'):
     cur = con.cursor()
     cur.execute("select get_reduced_tilelayer(%s, %s, %s, %s, %s)", (z, x, y, limit, timez))
     asmvt = cur.fetchone()[0]
@@ -42,6 +68,7 @@ async def get_vector_tiles(z, x, y, limit=100, timez='1970-01-01 7:00:00'):
             "Content-Type": "application/vnd.mapbox-vector-tile",
             "Access-Control-Allow-Origin": "*"
         }
+        response = Response(content=asmvt_bytes, headers=headers)
 
         # Return the ASMVT byte string as a response with headers
         return Response(content=asmvt_bytes, headers=headers)
