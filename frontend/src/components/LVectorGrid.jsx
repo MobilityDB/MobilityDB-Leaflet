@@ -100,15 +100,14 @@ export default function LVectorGrid() {
     async function extracted(updateTime = true) {
         if (!vectorTileLayerRef.current.isLoading() && !isUpdating) {
             setIsUpdating(true)
-            const newLayer = new L.vectorGrid.protobuf(`http://192.168.0.171:8000/vectorTiles/{z}/{x}/{y}?limit=${limit}&timez=${timez}`, 'Female',  options);
+            const newLayer = new L.vectorGrid.protobuf(`http://192.168.0.171:8000/vectorTiles/{z}/{x}/{y}?limit=${limit}&timez=${timez}`,  options);
             newLayer.once('load', () => {
                 const tmp = vectorTileLayerRef.current
                 vectorTileLayerRef.current = newLayer;
                 setIsUpdating(false)
                 setTimeout(()=>{tmp.remove()}, 30*(limit/100));
             });
-
-
+            newLayer.addTo(mapRef.current);
 
             const now = Date.now()
             setFps(Math.round(1000 / (now - currentTime)))
