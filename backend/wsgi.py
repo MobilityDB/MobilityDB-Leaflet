@@ -27,10 +27,10 @@ async def root():
 
 
 @app.get("/vectorTiles/{z}/{x}/{y}")
-async def get_vector_tiles(z, x, y, limit=100, timez='1970-01-01 7:00:00'):
+async def get_vector_tiles(z, x, y, limit=100):
     t = time.time()
     cur = con.cursor()
-    cur.execute("select tripsfct(%s, %s, %s)", (z, x, y))
+    cur.execute("select tripsfct(%s, %s, %s, %s)", (z, x, y, limit))
     asmvt = cur.fetchone()[0]
     cur.close()
 

@@ -12,13 +12,23 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
         this.redraw();
     },
 
-    initialize: function (url, options) {
+
+    initialize: function (url, timestamp, options) {
         this._jsons = {};
-        this._timestamp = 0;
+        this._timestamp = timestamp;
         L.VectorGrid.Protobuf.prototype.initialize.call(this, url, options);
     },
+    setUrl: function(url, noRedraw) {
+		this._url = url;
 
-    extract_geom: function (json, timestamp) {
+		if (!noRedraw) {
+            this._jsons = {};
+			this.redraw();
+		}
+
+		return this;
+	},
+    extract_geom: function (json, timestamp, z) {
         for (var layerName in json.layers) {
             var feats = [];
 
@@ -49,6 +59,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
                     var y = geom[previous].y + factor * (geom[previous + 1].y - geom[previous].y);
                     feat.geometry = [{x: x, y: y}];
                 }
+                feat.properties.radius = z/3;
 
                 feats.push(feat);
             }
@@ -76,14 +87,14 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
         const timestamp = this._timestamp;
         var _this = this;
         if (this._jsons[this._tileCoordsToKey(coords)] === undefined) {
+
+            var t = Date.now();
             return fetch(tileUrl, this.options.fetchOptions).then(function (response) {
                 if (!response.ok) {
                     return {layers: []};
                 }
 
                 return response.blob().then(function (blob) {
-// 				console.log(blob);
-
                     var reader = new FileReader();
                     return new Promise(function (resolve) {
                         reader.addEventListener("loadend", function () {
@@ -92,6 +103,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
                             // blob.type === 'application/x-protobuf'
                             var pbf = new Pbf(reader.result);
 // 						console.log(pbf);
+
                             return resolve(new VectorTile(pbf));
 
                         });
@@ -102,13 +114,15 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
 // 			console.log('Vector tile water:', json.layers.water);	// Instance of VectorTileLayer
 
                 // Normalize feature getters into actual instanced features
-                _this.extract_geom(json, timestamp);
+                _this.extract_geom(json, timestamp, data.z);
                 _this._jsons[_this._tileCoordsToKey(coords)] = json;
+
+                console.log('Vector tile load time:', Date.now() - t, 'ms');
                 return json;
             });
         } else {
             return new Promise(function (resolve) {
-                const res = _this.extract_geom(_this._jsons[_this._tileCoordsToKey(coords)], timestamp)
+                const res = _this.extract_geom(_this._jsons[_this._tileCoordsToKey(coords)], timestamp, data.z)
                 return resolve(res);
             });
         }
@@ -138,7 +152,7 @@ export default function LVectorGrid() {
         vectorTileLayerStyles: {
             reduced: function (properties, zoom) {
                 return {
-                    radius: 3,
+                    radius: properties.radius,
                     weight: 2,
                     fill: true,
                     fillColor: "black",
@@ -166,6 +180,7 @@ export default function LVectorGrid() {
 
         vectorTileLayerRef.current = new L.CustomVectorGrid(
             `http://192.168.0.171:7802/public.tripsfct/{z}/{x}/{y}.pbf`,
+            timestamp,
             options
         ).addTo(map);
 
@@ -229,7 +244,11 @@ export default function LVectorGrid() {
             setAverageFps(Math.round(updateCount / (Date.now() - startTime) * 1000))
             extracted(true);
         }
-    }, [timez, startSimulation, limit]);
+    }, [timez, startSimulation]);
+
+    useEffect(() => {
+        vectorTileLayerRef.current.setUrl(`http://192.168.0.171:7802/public.tripsfct/{z}/{x}/{y}.pbf?maxpoints=${limit}`, false)
+    }, [limit]);
 
     useEffect(() => {
         if (startSimulation) {
@@ -254,7 +273,7 @@ export default function LVectorGrid() {
             </button>
             <button onClick={() => {
                 setTimez("1970-01-01 7:00:00");
-                setTimestamp(22500)
+                setTimestamp(25200)
             }}>
                 reset time
             </button>
