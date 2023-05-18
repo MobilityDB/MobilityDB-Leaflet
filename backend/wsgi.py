@@ -28,8 +28,9 @@ async def root():
 
 @app.get("/vectorTiles/{z}/{x}/{y}")
 async def get_vector_tiles(z, x, y, limit=100, timez='1970-01-01 7:00:00'):
+    t = time.time()
     cur = con.cursor()
-    cur.execute("select get_reduced_tilelayer(%s, %s, %s, %s, %s)", (z, x, y, limit, timez))
+    cur.execute("select tripsfct(%s, %s, %s)", (z, x, y))
     asmvt = cur.fetchone()[0]
     cur.close()
 
@@ -42,7 +43,7 @@ async def get_vector_tiles(z, x, y, limit=100, timez='1970-01-01 7:00:00'):
             "Content-Type": "application/vnd.mapbox-vector-tile",
             "Access-Control-Allow-Origin": "*"
         }
-
+        print("Time taken: ", time.time() - t)
         # Return the ASMVT byte string as a response with headers
         return Response(content=asmvt_bytes, headers=headers)
     else:
