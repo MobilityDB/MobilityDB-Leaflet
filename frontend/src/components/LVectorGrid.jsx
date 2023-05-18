@@ -7,7 +7,7 @@ import Pbf from "pbf";
 
 L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
 
-    setTimestamp: function(timestamp) {
+    setTimestamp: function (timestamp) {
         this._timestamp = timestamp;
         this.redraw();
     },
@@ -35,15 +35,19 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
                 if (times.includes(timestamp)) {
                     feat.geometry = [geom[times.indexOf(timestamp)]];
                 } else {
-                    // find closest timestamp
-                    var closest = 0;
+                    var previous = 0;
                     for (var j = 1; j < times.length; j++) {
                         if (times[j] > timestamp) {
-                            closest = j-1;
+                            previous = j - 1;
                             break;
                         }
                     }
-                    feat.geometry = [geom[closest]];
+                    // compute the interpolation factor
+                    var factor = (timestamp - times[previous]) / (times[previous + 1] - times[previous]);
+                    // compute the interpolated point
+                    var x = geom[previous].x + factor * (geom[previous + 1].x - geom[previous].x);
+                    var y = geom[previous].y + factor * (geom[previous + 1].y - geom[previous].y);
+                    feat.geometry = [{x: x, y: y}];
                 }
 
                 feats.push(feat);
@@ -52,63 +56,63 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
         }
         return json;
     },
-    _getVectorTilePromise: function(coords) {
-		var data = {
-			s: this._getSubdomain(coords),
-			x: coords.x,
-			y: coords.y,
-			z: coords.z
+    _getVectorTilePromise: function (coords) {
+        var data = {
+            s: this._getSubdomain(coords),
+            x: coords.x,
+            y: coords.y,
+            z: coords.z
 // 			z: this._getZoomForUrl()	/// TODO: Maybe replicate TileLayer's maxNativeZoom
-		};
-		if (this._map && !this._map.options.crs.infinite) {
-			var invertedY = this._globalTileRange.max.y - coords.y;
-			if (this.options.tms) { // Should this option be available in Leaflet.VectorGrid?
-				data['y'] = invertedY;
-			}
-			data['-y'] = invertedY;
-		}
+        };
+        if (this._map && !this._map.options.crs.infinite) {
+            var invertedY = this._globalTileRange.max.y - coords.y;
+            if (this.options.tms) { // Should this option be available in Leaflet.VectorGrid?
+                data['y'] = invertedY;
+            }
+            data['-y'] = invertedY;
+        }
 
-		var tileUrl = L.Util.template(this._url, L.extend(data, this.options));
+        var tileUrl = L.Util.template(this._url, L.extend(data, this.options));
         const timestamp = this._timestamp;
         var _this = this;
         if (this._jsons[this._tileCoordsToKey(coords)] === undefined) {
-        return fetch(tileUrl, this.options.fetchOptions).then(function(response){
-            if (!response.ok) {
-                return {layers:[]};
-            }
+            return fetch(tileUrl, this.options.fetchOptions).then(function (response) {
+                if (!response.ok) {
+                    return {layers: []};
+                }
 
-            return response.blob().then( function (blob) {
+                return response.blob().then(function (blob) {
 // 				console.log(blob);
 
-                var reader = new FileReader();
-                return new Promise(function(resolve){
-                    reader.addEventListener("loadend", function() {
-                        // reader.result contains the contents of blob as a typed array
+                    var reader = new FileReader();
+                    return new Promise(function (resolve) {
+                        reader.addEventListener("loadend", function () {
+                            // reader.result contains the contents of blob as a typed array
 
-                        // blob.type === 'application/x-protobuf'
-                        var pbf = new Pbf( reader.result );
+                            // blob.type === 'application/x-protobuf'
+                            var pbf = new Pbf(reader.result);
 // 						console.log(pbf);
-                        return resolve(new VectorTile( pbf ));
+                            return resolve(new VectorTile(pbf));
 
+                        });
+                        reader.readAsArrayBuffer(blob);
                     });
-                    reader.readAsArrayBuffer(blob);
                 });
-            });
-        }).then(function(json){
+            }).then(function (json) {
 // 			console.log('Vector tile water:', json.layers.water);	// Instance of VectorTileLayer
 
-            // Normalize feature getters into actual instanced features
-            _this.extract_geom(json, timestamp);
-            _this._jsons[_this._tileCoordsToKey(coords)] = json;
-            return json;
-        });
+                // Normalize feature getters into actual instanced features
+                _this.extract_geom(json, timestamp);
+                _this._jsons[_this._tileCoordsToKey(coords)] = json;
+                return json;
+            });
         } else {
-            return new Promise(function(resolve){
+            return new Promise(function (resolve) {
                 const res = _this.extract_geom(_this._jsons[_this._tileCoordsToKey(coords)], timestamp)
                 return resolve(res);
             });
         }
-	}
+    }
 
 });
 
@@ -128,22 +132,23 @@ export default function LVectorGrid() {
     const [timestamp, setTimestamp] = useState(25200)
 
     const options = {
-            opacity: 1,
-            rendererFactory: L.canvas.tile,
-            vectorTileLayerStyles: {
-                reduced: function (properties, zoom) {
-                    return {
-                        radius: 3,
-                        weight: 2,
-                        fill: true,
-                        fillColor: "black" ,
-                        fillOpacity: 1,
-                        color: "black" ,
-                    };
-                },
+        opacity: 1,
+        rendererFactory: L.canvas.tile,
+
+        vectorTileLayerStyles: {
+            reduced: function (properties, zoom) {
+                return {
+                    radius: 3,
+                    weight: 2,
+                    fill: true,
+                    fillColor: "black",
+                    fillOpacity: 1,
+                    color: "black",
+                };
             },
-            bounds: L.latLngBounds(L.latLng(49.5, 2.5), L.latLng(51.51, 6.4)),
-        }
+        },
+        bounds: L.latLngBounds(L.latLng(49.5, 2.5), L.latLng(51.51, 6.4)),
+    }
 
     useEffect(() => {
         const map = L.map("map", {
@@ -157,7 +162,6 @@ export default function LVectorGrid() {
 
 
         mapRef.current = map;
-
 
 
         vectorTileLayerRef.current = new L.CustomVectorGrid(
@@ -244,11 +248,14 @@ export default function LVectorGrid() {
 
     return (
         <div style={{height: "100%", position: "relative"}}>
-            <div id="map" style={{height: "50%", position: "relative"}}></div>
+            <div id="map" style={{height: "75%", position: "relative"}}></div>
             <button onClick={() => setStartSimulation(!startSimulation)}>
                 start simulation
             </button>
-            <button onClick={() => {setTimez("1970-01-01 7:00:00"); setTimestamp(22500)}}>
+            <button onClick={() => {
+                setTimez("1970-01-01 7:00:00");
+                setTimestamp(22500)
+            }}>
                 reset time
             </button>
             <input type='number' value={limit} onChange={(e) => setLimit(e.target.value)}/>
