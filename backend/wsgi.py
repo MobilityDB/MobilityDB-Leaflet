@@ -50,11 +50,10 @@ async def get_vector_tiles(z, x, y, limit=100):
         return Response(content="No data found for this tile", status_code=404)
 
 @app.get("/geojson")
-async def get_geojson(limit=100, timez='1970-01-01 7:00:00'):
+async def get_geojson(limit=2000, timez='1970-01-01 7:00:00'):
     cur = con.cursor()
-    t = time.time()
-    cur.execute("select get_geojson_tilelayer(%s, %s)", (limit, timez))
-    geojson = cur.fetchone()[0]
+    cur.execute("SELECT asMFJSON(transform(fullday_trajectory, 4326))::json FROM persona_small_2000 LIMIT %s", (limit,))
+    geojson = cur.fetchall()
     cur.close()
 
     ## send geojson as response
