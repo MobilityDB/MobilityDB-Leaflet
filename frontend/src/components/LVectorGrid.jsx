@@ -18,16 +18,58 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
         this._timestamp = timestamp;
         L.VectorGrid.Protobuf.prototype.initialize.call(this, url, options);
     },
-    setUrl: function(url, noRedraw) {
-		this._url = url;
+    setUrl: function (url, noRedraw) {
+        this._url = url;
 
-		if (!noRedraw) {
+        if (!noRedraw) {
             this._jsons = {};
-			this.redraw();
-		}
+            this.redraw();
+        }
 
-		return this;
-	},
+        return this;
+    },
+    fetch_next_layer: async function () {
+        for (const coords_txt in this._jsons) {
+            const coords = this._keyToTileCoords(coords_txt);
+            // pass through next z layer
+            if (this._jsons[coords_txt].clientAsked && coords.z === this._currentZ) {
+                //get all x, y, z coords of next layer
+                for (var x = 2 * coords.x; x < 2 * coords.x + 2; x++) {
+                    for (var y = 2 * coords.y; y < 2 * coords.y + 2; y++) {
+                        var newCoords = new L.Point(x, y);
+                        newCoords.z = coords.z + 1;
+                        newCoords.subdomains =  this._getSubdomain(newCoords)
+                        if (this._jsons[this._tileCoordsToKey(newCoords)] === undefined) {
+                            var tileUrl = L.Util.template(this._url, L.extend(newCoords, this.options));
+                            var json = await fetch(tileUrl, this.options.fetchOptions).then(function (response) {
+                                if (!response.ok) {
+                                    return {layers: []};
+                                }
+
+                                return response.blob().then(function (blob) {
+                                    var reader = new FileReader();
+                                    return new Promise(function (resolve) {
+                                        reader.addEventListener("loadend", function () {
+                                            var pbf = new Pbf(reader.result);
+
+                                            return resolve(new VectorTile(pbf));
+
+                                        });
+                                        reader.readAsArrayBuffer(blob);
+                                    });
+                                });
+                            }).then(function (json) {
+                                return json;
+                            });
+                            json.clientAsked = false;
+                            this._jsons[this._tileCoordsToKey(newCoords)] = json;
+                        }
+                    }
+                }
+            }
+        }
+    },
+
     extract_geom: function (json, timestamp, z) {
         for (var layerName in json.layers) {
             var feats = [];
@@ -59,11 +101,12 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
                     var y = geom[previous].y + factor * (geom[previous + 1].y - geom[previous].y);
                     feat.geometry = [{x: x, y: y}];
                 }
-                feat.properties.radius = z/3;
+                feat.properties.radius = z / 3;
 
                 feats.push(feat);
             }
             json.layers[layerName].features = feats;
+            json.clientAsked = true;
         }
         return json;
     },
@@ -73,7 +116,6 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
             x: coords.x,
             y: coords.y,
             z: coords.z
-// 			z: this._getZoomForUrl()	/// TODO: Maybe replicate TileLayer's maxNativeZoom
         };
         if (this._map && !this._map.options.crs.infinite) {
             var invertedY = this._globalTileRange.max.y - coords.y;
@@ -82,6 +124,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
             }
             data['-y'] = invertedY;
         }
+        this._currentZ = coords.z;
 
         var tileUrl = L.Util.template(this._url, L.extend(data, this.options));
         const timestamp = this._timestamp;
@@ -117,7 +160,6 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
                 _this.extract_geom(json, timestamp, data.z);
                 _this._jsons[_this._tileCoordsToKey(coords)] = json;
 
-                console.log('Vector tile load time:', Date.now() - t, 'ms');
                 return json;
             });
         } else {
@@ -148,6 +190,7 @@ export default function LVectorGrid() {
     const options = {
         opacity: 1,
         rendererFactory: L.canvas.tile,
+        keepBuffer: 2,
 
         vectorTileLayerStyles: {
             reduced: function (properties, zoom) {
@@ -182,7 +225,7 @@ export default function LVectorGrid() {
             `http://192.168.0.171:7802/public.tripsfct/{z}/{x}/{y}.pbf`,
             timestamp,
             options
-        ).addTo(map);
+        ).addTo(map); //.addEventListener('load', () => vectorTileLayerRef.current.fetch_next_layer())
 
 
         return () => {
@@ -205,7 +248,7 @@ export default function LVectorGrid() {
     }
 
     useEffect(() => {
-            const UPDATE_PER_SECOND = 24;
+            const UPDATE_PER_SECOND = 75;
             if (startSimulation) {
                 const interval = setInterval(() => {
                     updateTimez();
