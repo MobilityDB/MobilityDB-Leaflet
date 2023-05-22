@@ -3,6 +3,7 @@ import L from "leaflet";
 import "leaflet.vectorgrid";
 import {VectorTile} from 'vector-tile';
 import Pbf from "pbf";
+import Slider from "./Slider";
 
 
 L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
@@ -238,13 +239,13 @@ export default function LVectorGrid() {
             const date = new Date(timez);
             date.setSeconds(date.getSeconds() + 10);
             date.setHours(date.getHours() + 1);
-            if (date.getHours() >= 23) {
+            if (date.getHours()-1 >= 23) {
                 date.setMinutes(0);
                 date.setHours(7);
             }
             return date.toISOString().slice(0, 19).replace("T", " ");
         });
-        setTimestamp((timestamp) => timestamp + 10);
+        setTimestamp((timestamp) => timestamp >= 82800 ? 25200 : timestamp + 10);
     }
 
     useEffect(() => {
@@ -322,6 +323,10 @@ export default function LVectorGrid() {
             </button>
             <input type='number' value={limit} onChange={(e) => setLimit(e.target.value)}/>
             <div>{timez}</div>
+            <Slider min={0} max={82800} value={timestamp} onChange={(e) => {
+                setTimestamp(parseInt(e.target.value))
+                setTimez(new Date(e.target.value * 1000).toISOString().slice(0, 19).replace("T", " "))
+            }}/>
             <div>{fps}</div>
             <div>Average fps: {averageFps}</div>
         </div>

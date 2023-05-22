@@ -54,7 +54,7 @@ export default function GeojsonLayer() {
 
 
     useEffect(() => {
-            const UPDATE_PER_SECOND = 24;
+            const UPDATE_PER_SECOND = 75;
             if (startSimulation) {
                 const interval = setInterval(() => {
                     updateTimez();
@@ -105,9 +105,10 @@ export default function GeojsonLayer() {
             }
 
             L.circle([coordinates[1], coordinates[0]], {
-                color: "red",
-                fillColor: "#f03",
-                fillOpacity: 0.5,
+                color: "black",
+                fillColor: "black",
+                fillOpacity: 1,
+                radius: 10,
             }).addTo(geojsonlayerRef.current);
         })
     }
