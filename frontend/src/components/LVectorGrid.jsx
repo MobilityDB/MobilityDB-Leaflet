@@ -178,7 +178,7 @@ export default function LVectorGrid() {
     const vectorTileLayerRef = useRef(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [startSimulation, setStartSimulation] = useState(false);
-    const [timez, setTimez] = useState("1970-01-01 7:00:00");
+    const [timez, setTimez] = useState("1970-01-01 6:00:00");
     const [limit, setLimit] = useState(100)
     const [currentTime, setCurrentTime] = useState(Date.now())
     const [fps, setFps] = useState(0)
@@ -186,7 +186,7 @@ export default function LVectorGrid() {
     const [averageFps, setAverageFps] = useState(0)
     const [updateCount, setUpdateCount] = useState(0)
     const [intervalTime, setIntervalTime] = useState(null)
-    const [timestamp, setTimestamp] = useState(25200)
+    const [timestamp, setTimestamp] = useState(21600)
 
     const options = {
         opacity: 1,
@@ -235,17 +235,17 @@ export default function LVectorGrid() {
     }, []);
 
     function updateTimez() {
-        setTimez((timez) => {
-            const date = new Date(timez);
-            date.setSeconds(date.getSeconds() + 10);
-            date.setHours(date.getHours() + 1);
-            if (date.getHours()-1 >= 23) {
-                date.setMinutes(0);
-                date.setHours(7);
+        const SECOND_PER_UPDATE = 10;
+        setTimestamp((timestamp) => {
+            if (timestamp >= 82800) {
+                setTimez("1970-01-01 6:00:00")
+                return 21600
             }
-            return date.toISOString().slice(0, 19).replace("T", " ");
-        });
-        setTimestamp((timestamp) => timestamp >= 82800 ? 25200 : timestamp + 10);
+            else {
+                var nextTimestamp = timestamp + SECOND_PER_UPDATE
+                setTimez(new Date(nextTimestamp*1000).toISOString().substr(0, 19).replace('T', ' '))
+                return timestamp + SECOND_PER_UPDATE
+            }});
     }
 
     useEffect(() => {
@@ -316,8 +316,8 @@ export default function LVectorGrid() {
                 start simulation
             </button>
             <button onClick={() => {
-                setTimez("1970-01-01 7:00:00");
-                setTimestamp(25200)
+                setTimez("1970-01-01 6:00:00");
+                setTimestamp(21600)
             }}>
                 reset time
             </button>
