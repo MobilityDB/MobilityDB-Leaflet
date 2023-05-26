@@ -11,6 +11,7 @@ function App() {
   return (
     <div className={'App notransition'}>
       <LVectorGrid/>
+      <GeojsonLayer/>
     </div>
   );
 }

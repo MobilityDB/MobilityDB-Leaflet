@@ -135,7 +135,7 @@ export default function GeojsonLayer() {
 
     useEffect(() => {
         setFetching(true)
-        fetch(`http://localhost:8000/geojson?limit=${limit}`).then((res) => res.json()).then((data) => {
+        fetch(`http://192.168.0.171:8000/geojson?limit=${limit}`).then((res) => res.json()).then((data) => {
             console.log("data fetched")
             data = clean_data(data);
             setData(data);
@@ -154,7 +154,8 @@ export default function GeojsonLayer() {
 
 
     return (
-        <div style={{height: '100%', position: 'relative'}}>
+        <div style={{height: '100%', width: '100%', position: 'relative'}}>
+            <h1>GeoJSON</h1>
             <div id="map" style={{height: "75%", position: 'relative'}}></div>
             <div>{timez}</div>
             <input type={"number"} value={limit} onChange={(e) => setLimit(e.target.value)} step={100}/>

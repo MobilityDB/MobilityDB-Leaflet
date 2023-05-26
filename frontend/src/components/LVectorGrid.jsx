@@ -209,7 +209,7 @@ export default function LVectorGrid() {
     }
 
     useEffect(() => {
-        const map = L.map("map", {
+        const map = L.map("map_vector_grid", {
             fadeAnimation: false,
         }).setView([50.5, 4], 8);
         L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -249,7 +249,7 @@ export default function LVectorGrid() {
     }
 
     useEffect(() => {
-            const UPDATE_PER_SECOND = 75;
+            const UPDATE_PER_SECOND = 100;
             if (startSimulation) {
                 const interval = setInterval(() => {
                     updateTimez();
@@ -310,8 +310,9 @@ export default function LVectorGrid() {
     }, [limit]);
 
     return (
-        <div style={{height: "100%", position: "relative"}}>
-            <div id="map" style={{height: "75%", position: "relative"}}></div>
+        <div style={{height: "100%", width: '100%', position: "relative"}}>
+            <h1>VectorGrid</h1>
+            <div id="map_vector_grid" style={{height: "75%", position: "relative"}}></div>
             <button onClick={() => setStartSimulation(!startSimulation)}>
                 start simulation
             </button>
