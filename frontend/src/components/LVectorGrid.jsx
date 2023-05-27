@@ -144,14 +144,12 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
                 _this.checkCache(data.z)
                 // Normalize feature getters into actual instanced features
                 _this.extract_geom(json, timestamp, data.z);
-                if (_this._jsons[_this._tileCoordsToKey(coords)] === undefined) {
-                    _this._jsons[_this._tileCoordsToKey(coords)] = {json: json, uses: 1, cached: true, lastTimestamp: timestamp};
-                } else {
-                    _this._jsons[_this._tileCoordsToKey(coords)].lastTimestamp = timestamp;
-                    _this._jsons[_this._tileCoordsToKey(coords)].uses += 1;
-                    _this._jsons[_this._tileCoordsToKey(coords)].json = json;
-                    _this._jsons[_this._tileCoordsToKey(coords)].cached = true;
+                let uses = 1
+                if (_this._jsons[_this._tileCoordsToKey(coords)] !== undefined) {
+                    uses = _this._jsons[_this._tileCoordsToKey(coords)].uses+=1;
                 }
+                _this._jsons[_this._tileCoordsToKey(coords)] = {json: json, uses: uses, cached: true, lastTimestamp: timestamp};
+
 
                 return json;
             });
@@ -173,7 +171,7 @@ export default function LVectorGrid() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [startSimulation, setStartSimulation] = useState(false);
     const [cachedWindow, setCachedWindow] = useState(0);
-    const [cachedWindowMax, setCachedWindowMax] = useState(20);
+    const [cachedWindowMax, setCachedWindowMax] = useState(100);
     const [timez, setTimez] = useState("1970-01-01 6:00:00");
     const [limit, setLimit] = useState(100)
     const [currentTime, setCurrentTime] = useState(Date.now())
@@ -225,6 +223,7 @@ export default function LVectorGrid() {
             setCachedWindow,
             options
         ).addTo(map); //.addEventListener('load', () => vectorTileLayerRef.current.fetch_next_layer())
+
 
 
         return () => {
