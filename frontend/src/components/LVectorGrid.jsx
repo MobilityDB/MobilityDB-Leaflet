@@ -12,12 +12,39 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
         this._timestamp = timestamp;
         this.redraw();
     },
-
-
-    initialize: function (url, timestamp, options) {
+    clearCache: function () {
         this._jsons = {};
+        this.redraw();
+    },
+    initialize: function (url, timestamp, cachedWindowSize, cacheWindowSetter, options) {
+        this._jsons = {};
+        this._cachedWindowSetter = cacheWindowSetter;
+        this.cacheWindowSize = cachedWindowSize;
         this._timestamp = timestamp;
         L.VectorGrid.Protobuf.prototype.initialize.call(this, url, options);
+    },
+    checkCache(z) {
+        let cachedKeys = Object.keys(this._jsons);
+        let cachedJson = cachedKeys.filter((key) => this._jsons[key].cached);
+        console.log('Cached window size: ' + cachedJson.length + ' / ' + this.cacheWindowSize + ' tiles')
+        this._cachedWindowSetter(cachedJson.length);
+        if (cachedJson.length >= this.cacheWindowSize) {
+            let deleteOptions = cachedJson.filter((key) => this._keyToTileCoords(key).z !== z);
+            if (deleteOptions.length === 0) {
+                deleteOptions = cachedJson;
+            }
+            let deleteJson = null;
+            let tmpUses = 999999;
+            console.log(deleteOptions)
+            for (let key of deleteOptions) {
+                if (this._jsons[key].uses < tmpUses) {
+                    tmpUses = this._jsons[key].uses;
+                    deleteJson = this._jsons[key];
+                }
+            }
+            deleteJson.cached = false;
+            deleteJson.json = null;
+        }
     },
     setUrl: function (url, noRedraw) {
         this._url = url;
@@ -26,49 +53,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
             this._jsons = {};
             this.redraw();
         }
-
         return this;
-    },
-    fetch_next_layer: async function () {
-        for (const coords_txt in this._jsons) {
-            const coords = this._keyToTileCoords(coords_txt);
-            // pass through next z layer
-            if (this._jsons[coords_txt].clientAsked && coords.z === this._currentZ) {
-                //get all x, y, z coords of next layer
-                for (var x = 2 * coords.x; x < 2 * coords.x + 2; x++) {
-                    for (var y = 2 * coords.y; y < 2 * coords.y + 2; y++) {
-                        var newCoords = new L.Point(x, y);
-                        newCoords.z = coords.z + 1;
-                        newCoords.subdomains =  this._getSubdomain(newCoords)
-                        if (this._jsons[this._tileCoordsToKey(newCoords)] === undefined) {
-                            var tileUrl = L.Util.template(this._url, L.extend(newCoords, this.options));
-                            var json = await fetch(tileUrl, this.options.fetchOptions).then(function (response) {
-                                if (!response.ok) {
-                                    return {layers: []};
-                                }
-
-                                return response.blob().then(function (blob) {
-                                    var reader = new FileReader();
-                                    return new Promise(function (resolve) {
-                                        reader.addEventListener("loadend", function () {
-                                            var pbf = new Pbf(reader.result);
-
-                                            return resolve(new VectorTile(pbf));
-
-                                        });
-                                        reader.readAsArrayBuffer(blob);
-                                    });
-                                });
-                            }).then(function (json) {
-                                return json;
-                            });
-                            json.clientAsked = false;
-                            this._jsons[this._tileCoordsToKey(newCoords)] = json;
-                        }
-                    }
-                }
-            }
-        }
     },
 
     extract_geom: function (json, timestamp, z) {
@@ -107,7 +92,6 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
                 feats.push(feat);
             }
             json.layers[layerName].features = feats;
-            json.clientAsked = true;
         }
         return json;
     },
@@ -130,8 +114,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
         var tileUrl = L.Util.template(this._url, L.extend(data, this.options));
         const timestamp = this._timestamp;
         var _this = this;
-        if (this._jsons[this._tileCoordsToKey(coords)] === undefined) {
-
+        if (this._jsons[this._tileCoordsToKey(coords)] === undefined || this._jsons[this._tileCoordsToKey(coords)].cached === false) {
             var t = Date.now();
             return fetch(tileUrl, this.options.fetchOptions).then(function (response) {
                 if (!response.ok) {
@@ -146,7 +129,6 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
 
                             // blob.type === 'application/x-protobuf'
                             var pbf = new Pbf(reader.result);
-// 						console.log(pbf);
 
                             return resolve(new VectorTile(pbf));
 
@@ -155,17 +137,23 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
                     });
                 });
             }).then(function (json) {
-// 			console.log('Vector tile water:', json.layers.water);	// Instance of VectorTileLayer
-
+                _this.checkCache(data.z)
                 // Normalize feature getters into actual instanced features
                 _this.extract_geom(json, timestamp, data.z);
-                _this._jsons[_this._tileCoordsToKey(coords)] = json;
+                if (_this._jsons[_this._tileCoordsToKey(coords)] === undefined) {
+                    _this._jsons[_this._tileCoordsToKey(coords)] = {json: json, uses: 1, cached: true};
+                } else {
+                    _this._jsons[_this._tileCoordsToKey(coords)].uses += 1;
+                    _this._jsons[_this._tileCoordsToKey(coords)].json = json;
+                    _this._jsons[_this._tileCoordsToKey(coords)].cached = true;
+                }
 
                 return json;
             });
         } else {
             return new Promise(function (resolve) {
-                const res = _this.extract_geom(_this._jsons[_this._tileCoordsToKey(coords)], timestamp, data.z)
+                const res = _this.extract_geom(_this._jsons[_this._tileCoordsToKey(coords)].json, timestamp, data.z)
+                _this._jsons[_this._tileCoordsToKey(coords)].uses += 1;
                 return resolve(res);
             });
         }
@@ -178,6 +166,8 @@ export default function LVectorGrid() {
     const vectorTileLayerRef = useRef(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [startSimulation, setStartSimulation] = useState(false);
+    const [cachedWindow, setCachedWindow] = useState(0);
+    const [cachedWindowMax, setCachedWindowMax] = useState(100);
     const [timez, setTimez] = useState("1970-01-01 6:00:00");
     const [limit, setLimit] = useState(100)
     const [currentTime, setCurrentTime] = useState(Date.now())
@@ -225,6 +215,8 @@ export default function LVectorGrid() {
         vectorTileLayerRef.current = new L.CustomVectorGrid(
             `http://192.168.0.171:7802/public.tripsfct/{z}/{x}/{y}.pbf`,
             timestamp,
+            cachedWindowMax,
+            setCachedWindow,
             options
         ).addTo(map); //.addEventListener('load', () => vectorTileLayerRef.current.fetch_next_layer())
 
@@ -330,6 +322,8 @@ export default function LVectorGrid() {
             }}/>
             <div>{fps}</div>
             <div>Average fps: {averageFps}</div>
+            <div>Cached tiles: {cachedWindow}/{cachedWindowMax}</div>
+            <button onClick={() => vectorTileLayerRef.current.clearCache()}>Clear cache</button>
         </div>
     );
 }

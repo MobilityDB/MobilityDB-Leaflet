@@ -136,7 +136,6 @@ export default function GeojsonLayer() {
     useEffect(() => {
         setFetching(true)
         fetch(`http://192.168.0.171:8000/geojson?limit=${limit}`).then((res) => res.json()).then((data) => {
-            console.log("data fetched")
             data = clean_data(data);
             setData(data);
             setFetching(false)
