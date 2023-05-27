@@ -24,6 +24,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
         L.VectorGrid.Protobuf.prototype.initialize.call(this, url, options);
     },
     checkCache(z) {
+        let testTimestamp = false;
         let cachedKeys = Object.keys(this._jsons);
         let cachedJson = cachedKeys.filter((key) => this._jsons[key].cached);
         this._cachedWindowSetter(cachedJson.length);
@@ -31,13 +32,17 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
             let deleteOptions = cachedJson.filter((key) => this._keyToTileCoords(key).z !== z);
             if (deleteOptions.length === 0) {
                 deleteOptions = cachedJson;
+                testTimestamp = true
             }
             let deleteJson = null;
             let tmpUses = Number.POSITIVE_INFINITY;
-            console.log(deleteOptions)
             for (let key of deleteOptions) {
-                if (this._jsons[key].uses < tmpUses) {
-                    tmpUses = this._jsons[key].uses;
+                let toTest = this._jsons[key].uses;
+                if (testTimestamp) {
+                    toTest = this._jsons[key].lastTimestamp;
+                }
+                if (toTest < tmpUses) {
+                    tmpUses = toTest;
                     deleteJson = this._jsons[key];
                 }
             }
@@ -140,8 +145,9 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
                 // Normalize feature getters into actual instanced features
                 _this.extract_geom(json, timestamp, data.z);
                 if (_this._jsons[_this._tileCoordsToKey(coords)] === undefined) {
-                    _this._jsons[_this._tileCoordsToKey(coords)] = {json: json, uses: 1, cached: true};
+                    _this._jsons[_this._tileCoordsToKey(coords)] = {json: json, uses: 1, cached: true, lastTimestamp: timestamp};
                 } else {
+                    _this._jsons[_this._tileCoordsToKey(coords)].lastTimestamp = timestamp;
                     _this._jsons[_this._tileCoordsToKey(coords)].uses += 1;
                     _this._jsons[_this._tileCoordsToKey(coords)].json = json;
                     _this._jsons[_this._tileCoordsToKey(coords)].cached = true;
@@ -153,6 +159,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
             return new Promise(function (resolve) {
                 const res = _this.extract_geom(_this._jsons[_this._tileCoordsToKey(coords)].json, timestamp, data.z)
                 _this._jsons[_this._tileCoordsToKey(coords)].uses += 1;
+                _this._jsons[_this._tileCoordsToKey(coords)].lastTimestamp = timestamp;
                 return resolve(res);
             });
         }
@@ -166,7 +173,7 @@ export default function LVectorGrid() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [startSimulation, setStartSimulation] = useState(false);
     const [cachedWindow, setCachedWindow] = useState(0);
-    const [cachedWindowMax, setCachedWindowMax] = useState(100);
+    const [cachedWindowMax, setCachedWindowMax] = useState(20);
     const [timez, setTimez] = useState("1970-01-01 6:00:00");
     const [limit, setLimit] = useState(100)
     const [currentTime, setCurrentTime] = useState(Date.now())
