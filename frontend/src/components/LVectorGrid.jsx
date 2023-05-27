@@ -26,7 +26,6 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
     checkCache(z) {
         let cachedKeys = Object.keys(this._jsons);
         let cachedJson = cachedKeys.filter((key) => this._jsons[key].cached);
-        console.log('Cached window size: ' + cachedJson.length + ' / ' + this.cacheWindowSize + ' tiles')
         this._cachedWindowSetter(cachedJson.length);
         if (cachedJson.length >= this.cacheWindowSize) {
             let deleteOptions = cachedJson.filter((key) => this._keyToTileCoords(key).z !== z);
@@ -34,7 +33,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
                 deleteOptions = cachedJson;
             }
             let deleteJson = null;
-            let tmpUses = 999999;
+            let tmpUses = Number.POSITIVE_INFINITY;
             console.log(deleteOptions)
             for (let key of deleteOptions) {
                 if (this._jsons[key].uses < tmpUses) {
