@@ -189,20 +189,29 @@ export default function GeojsonLayer() {
         <div style={{height: '100%', width: '100%', position: 'relative'}}>
             <h1>GeoJSON</h1>
             <div id="map" style={{height: "75%", position: 'relative'}}></div>
-            <div>{timez}</div>
-            <input type={"number"} value={limit} onChange={(e) => setLimit(e.target.value)} step={100}/>
-            <button onClick={() => setStartSimulation(!startSimulation)}>Start/Stop</button>
-            <button onClick={() => {
-                setTimestamp(minMaxTimestamp[0])
-            }}>
-                reset time
-            </button>
-             <Slider min={minMaxTimestamp[0]} max={minMaxTimestamp[1]} value={timestamp} onChange={(e) => {
-                setTimestamp(parseInt(e.target.value))
-                setTimez(new Date(e.target.value * 1000).toISOString().slice(0, 19).replace("T", " "))
-            }}/>
-            <div>{fps}</div>
-            <div>Average fps: {averageFps}</div>
+            <div className={'param-container'}>
+                <div>
+                <div className={'button'} onClick={() => setStartSimulation(!startSimulation)}>Start/Stop</div>
+                <div className={'button'} onClick={() => {
+                    setTimestamp(minMaxTimestamp[0])
+                }}>
+                    reset time
+                </div>
+                    </div>
+                <div>
+                <div>{timez}</div>
+                 <Slider min={minMaxTimestamp[0]} max={minMaxTimestamp[1]} value={timestamp} onChange={(e) => {
+                    setTimestamp(parseInt(e.target.value))
+                    setTimez(new Date(e.target.value * 1000).toISOString().slice(0, 19).replace("T", " "))
+                }}/>
+                <input type={"number"} value={limit} onChange={(e) => setLimit(e.target.value)} step={100}/>
+</div>
+                <div>
+
+                <div>{fps}</div>
+                <div>Average fps: {averageFps}</div>
+                    </div>
+            </div>
         </div>)
 
 

@@ -27,3 +27,12 @@ code {
    opacity: 100 !important;
    visibility: visible !important;
 }
+
+.param-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+}

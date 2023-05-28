@@ -5,6 +5,33 @@
   position: absolute;
   flex-direction: row;
   column-gap: 10px;
+  background-color: #333333;
+  color: #f4f4f4;
+  font-family: "Trebuchet MS";
+}
+
+.button {
+  background-color: #008d9a;
+  color: #f4f4f4;
+  max-width: 120px;
+  padding: 5px;
+  margin: 3px 0;
+  border-radius: 5px;
+  align-content: center;
+  text-align: center;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #00b4cc;
+}
+
+.button.start {
+  background-color: #00b4cc;
+-webkit-box-shadow: inset 0px 0px 5px #c1c1c1;
+     -moz-box-shadow: inset 0px 0px 5px #c1c1c1;
+          box-shadow: inset 0px 0px 5px #c1c1c1;
+   outline: none;
 }
 
 .notransition * {
