@@ -191,7 +191,7 @@ export default function GeojsonLayer() {
             <div id="map" style={{height: "75%", position: 'relative'}}></div>
             <div className={'param-container'}>
                 <div>
-                <div className={'button'} onClick={() => setStartSimulation(!startSimulation)}>Start/Stop</div>
+                <div className={`button `+ (startSimulation ? 'start' : 'stop')} onClick={() => setStartSimulation(!startSimulation)}>Start/Stop</div>
                 <div className={'button'} onClick={() => {
                     setTimestamp(minMaxTimestamp[0])
                 }}>
