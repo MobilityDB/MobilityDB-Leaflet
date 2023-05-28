@@ -1,5 +1,6 @@
 import React, {useRef, useEffect, useState} from "react";
 import L from "leaflet";
+import Slider from "./Slider";
 
 export default function GeojsonLayer() {
     const mapRef = useRef(null);
@@ -11,6 +12,7 @@ export default function GeojsonLayer() {
     const [intervalTime, setIntervalTime] = useState(null)
     const [tileLayer, setTileLayer] = useState(null)
     const [timestamp, setTimestamp] = useState(25200)
+    const [minMaxTimestamp, setMinMaxTimestamp] = useState([0, 86000])
     const [fetching, setFetching] = useState(false)
     const [currentTime, setCurrentTime] = useState(Date.now())
     const [fps, setFps] = useState(0)
@@ -19,12 +21,23 @@ export default function GeojsonLayer() {
     const [updateCount, setUpdateCount] = useState(0)
 
     function clean_data(data) {
-        data.forEach((item) => {
-            item[0].datetimes = item[0].datetimes.map((time) => {
-                time = time + ":00"
-                return Date.parse(time)/1000;
+        if ('datetimes' in data[0][0]) {
+            data.forEach((item) => {
+                item[0].datetimes = item[0].datetimes.map((time) => {
+                    time = time + ":00"
+                    return Date.parse(time)/1000;
+                })
             })
-        })
+}
+        else {
+            data.forEach((item) => {
+                item[0].datetimes = item[0].sequences[0].datetimes.map((time) => {
+                    time = time + ":00"
+                    return Date.parse(time)/1000;
+                })
+                item[0].coordinates = item[0].sequences[0].coordinates
+            })
+        }
         return data;
     }
 
@@ -38,7 +51,15 @@ export default function GeojsonLayer() {
         setTileLayer(tilelayer);
         mapRef.current = map;
         geojsonlayerRef.current = new L.LayerGroup().addTo(map);
-        L.circle([50,4]).addTo(geojsonlayerRef.current);
+
+        fetch("http://192.168.0.171:8000/minmaxts?db_name=ais")
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data)
+                setMinMaxTimestamp([data.min, data.max]);
+                setTimestamp(data.min)
+            }
+        );
 
 
 
@@ -70,13 +91,16 @@ export default function GeojsonLayer() {
         , [startSimulation]);
 
     function updateTimez() {
-        const SECONDS_PER_UPDATE = 5;
-        setTimez((timez) => {
-            const date = new Date(timez);
-            date.setSeconds(date.getSeconds() + SECONDS_PER_UPDATE);
-            return date.toISOString();
-        });
-        setTimestamp((timestamp) => timestamp + SECONDS_PER_UPDATE)
+        const SECOND_PER_UPDATE = 10;
+        setTimestamp((timestamp) => {
+            if (timestamp >= minMaxTimestamp[1]) {
+                return minMaxTimestamp[0]
+            }
+            else {
+                var nextTimestamp = timestamp + SECOND_PER_UPDATE
+                setTimez(new Date(nextTimestamp*1000).toISOString().substr(0, 19).replace('T', ' '))
+                return timestamp + SECOND_PER_UPDATE
+            }});
     }
 
     function process_data() {
@@ -99,8 +123,13 @@ export default function GeojsonLayer() {
                 // compute the interpolation factor
                 var factor = (timestamp - times[previous]) / (times[previous + 1] - times[previous]);
                 // compute the interpolated point
-                var x = geom[previous][0] + factor * (geom[previous + 1][0] - geom[previous][0]);
-                var y = geom[previous][1] + factor * (geom[previous + 1][1] - geom[previous][1]);
+                if (geom.length>1){
+                    var x = geom[previous][0] + factor * (geom[previous + 1][0] - geom[previous][0]);
+                    var y = geom[previous][1] + factor * (geom[previous + 1][1] - geom[previous][1]);
+                } else {
+                    var x = geom[0][0];
+                    var y = geom[0][1];
+                }
                 coordinates = [x, y];
             }
 
@@ -112,6 +141,10 @@ export default function GeojsonLayer() {
             }).addTo(geojsonlayerRef.current);
         })
     }
+
+    useEffect(() => {
+        setTimez(new Date(timestamp*1000).toISOString().substr(0, 19).replace('T', ' '))
+    }, [timestamp])
 
     async function extracted(fetching) {
         if (!fetching && data.length > 0) {
@@ -135,7 +168,7 @@ export default function GeojsonLayer() {
 
     useEffect(() => {
         setFetching(true)
-        fetch(`http://192.168.0.171:8000/geojson?limit=${limit}`).then((res) => res.json()).then((data) => {
+        fetch(`http://192.168.0.171:8000/geojson?limit=${limit}&db_name=ais`).then((res) => res.json()).then((data) => {
             data = clean_data(data);
             setData(data);
             setFetching(false)
@@ -160,11 +193,14 @@ export default function GeojsonLayer() {
             <input type={"number"} value={limit} onChange={(e) => setLimit(e.target.value)} step={100}/>
             <button onClick={() => setStartSimulation(!startSimulation)}>Start/Stop</button>
             <button onClick={() => {
-                setTimez("1970-01-01 7:00:00");
-                setTimestamp(25200)
+                setTimestamp(minMaxTimestamp[0])
             }}>
                 reset time
             </button>
+             <Slider min={minMaxTimestamp[0]} max={minMaxTimestamp[1]} value={timestamp} onChange={(e) => {
+                setTimestamp(parseInt(e.target.value))
+                setTimez(new Date(e.target.value * 1000).toISOString().slice(0, 19).replace("T", " "))
+            }}/>
             <div>{fps}</div>
             <div>Average fps: {averageFps}</div>
         </div>)

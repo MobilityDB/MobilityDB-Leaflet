@@ -63,12 +63,14 @@ async def get_geojson(limit=2000, db_name='persona'):
         cur = con_persona.cursor()
         table_name = 'persona_small_4000'
         column_name = 'fullday_trajectory'
+        order_by = 'ORDER BY id'
     else:
         cur = con_ais.cursor()
         table_name = 'ships'
         column_name = 'trip'
-    url = f'SELECT asMFJSON(transform({column_name}, 4326))::json FROM {table_name} LIMIT %s'
-    cur.execute(url, (limit,))
+        order_by = 'ORDER BY mmsi'
+    url = f'WITH trips as (SELECT {column_name} as col FROM {table_name} {order_by} LIMIT %s)SELECT asMFJSON(transform(col, 4326))::json FROM trips  LIMIT %s'
+    cur.execute(url, (limit, limit,))
     geojson = cur.fetchall()
     cur.close()
 

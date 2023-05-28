@@ -203,10 +203,14 @@ export default function LVectorGrid() {
     }
 
     async function extractMinMaxTimestamp() {
-        const res = await fetch(`http://192.168.0.171:8000/minmaxts?db_name=persona`).then(res => res.json())
+        const res = await fetch(`http://192.168.0.171:8000/minmaxts?db_name=ais`).then(res => res.json())
         setMinMaxTimestamp([res.min, res.max])
         setTimestamp(res.min)
     }
+
+    useEffect(() => {
+        setTimez(new Date(timestamp*1000).toISOString().substr(0, 19).replace('T', ' '))
+    }, [timestamp])
 
     useEffect(() => {
         extractMinMaxTimestamp()
@@ -239,7 +243,7 @@ export default function LVectorGrid() {
     }, []);
 
     function updateTimez() {
-        const SECOND_PER_UPDATE = 10;
+        const SECOND_PER_UPDATE = 2
         setTimestamp((timestamp) => {
             if (timestamp >= minMaxTimestamp[1]) {
                 setTimez(new Date(minMaxTimestamp[0]*1000).toISOString().substr(0, 19).replace('T', ' '))
