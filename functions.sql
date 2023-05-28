@@ -24,4 +24,9 @@ STABLE
 PARALLEL SAFE;
 
 
-SELECT asMFJSON(transform(fullday_trajectory, 4326))::json FROM persona_small_2000 limit 1
+SELECT asMFJSON(transform(fullday_trajectory, 4326))::json FROM persona_small_2000 limit 1;
+
+update persona_small set fullday_trajectory = transform(fullday_trajectory, 3857);
+
+create index persona_small_reduced_geom_idx on persona_small_2000 using gist (fullday_trajectory);
+

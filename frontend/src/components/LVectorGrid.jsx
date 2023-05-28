@@ -171,8 +171,8 @@ export default function LVectorGrid() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [startSimulation, setStartSimulation] = useState(false);
     const [cachedWindow, setCachedWindow] = useState(0);
-    const [cachedWindowMax, setCachedWindowMax] = useState(100);
-    const [timez, setTimez] = useState("1970-01-01 6:00:00");
+    const [cachedWindowMax, setCachedWindowMax] = useState(10000);
+    const [timez, setTimez] = useState("1970-01-01 00:00:00");
     const [limit, setLimit] = useState(100)
     const [currentTime, setCurrentTime] = useState(Date.now())
     const [fps, setFps] = useState(0)
@@ -180,7 +180,8 @@ export default function LVectorGrid() {
     const [averageFps, setAverageFps] = useState(0)
     const [updateCount, setUpdateCount] = useState(0)
     const [intervalTime, setIntervalTime] = useState(null)
-    const [timestamp, setTimestamp] = useState(21600)
+    const [timestamp, setTimestamp] = useState(0)
+    const [minMaxTimestamp, setMinMaxTimestamp] = useState([0, 86000])
 
     const options = {
         opacity: 1,
@@ -199,10 +200,16 @@ export default function LVectorGrid() {
                 };
             },
         },
-        bounds: L.latLngBounds(L.latLng(49.5, 2.5), L.latLng(51.51, 6.4)),
+    }
+
+    async function extractMinMaxTimestamp() {
+        const res = await fetch(`http://192.168.0.171:8000/minmaxts?db_name=persona`).then(res => res.json())
+        setMinMaxTimestamp([res.min, res.max])
+        setTimestamp(res.min)
     }
 
     useEffect(() => {
+        extractMinMaxTimestamp()
         const map = L.map("map_vector_grid", {
             fadeAnimation: false,
         }).setView([50.5, 4], 8);
@@ -234,9 +241,9 @@ export default function LVectorGrid() {
     function updateTimez() {
         const SECOND_PER_UPDATE = 10;
         setTimestamp((timestamp) => {
-            if (timestamp >= 82800) {
-                setTimez("1970-01-01 6:00:00")
-                return 21600
+            if (timestamp >= minMaxTimestamp[1]) {
+                setTimez(new Date(minMaxTimestamp[0]*1000).toISOString().substr(0, 19).replace('T', ' '))
+                return minMaxTimestamp[0]
             }
             else {
                 var nextTimestamp = timestamp + SECOND_PER_UPDATE
@@ -314,14 +321,14 @@ export default function LVectorGrid() {
                 start simulation
             </button>
             <button onClick={() => {
-                setTimez("1970-01-01 6:00:00");
-                setTimestamp(21600)
+                new Date(minMaxTimestamp[0]*1000).toISOString().substr(0, 19).replace('T', ' ');
+                setTimestamp(minMaxTimestamp[0])
             }}>
                 reset time
             </button>
             <input type='number' value={limit} onChange={(e) => setLimit(e.target.value)}/>
             <div>{timez}</div>
-            <Slider min={0} max={82800} value={timestamp} onChange={(e) => {
+            <Slider min={minMaxTimestamp[0]} max={minMaxTimestamp[1]} value={timestamp} onChange={(e) => {
                 setTimestamp(parseInt(e.target.value))
                 setTimez(new Date(e.target.value * 1000).toISOString().slice(0, 19).replace("T", " "))
             }}/>
