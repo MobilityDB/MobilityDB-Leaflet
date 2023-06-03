@@ -8,10 +8,11 @@ import TripLayer from "./components/TripLayer";
 import "leaflet/dist/leaflet.css";
 
 function App() {
+  const db_name = "ais"
   return (
     <div className={'App notransition'}>
-      <LVectorGrid/>
-      <GeojsonLayer/>
+      <LVectorGrid db_name={db_name}/>
+      <GeojsonLayer db_name={db_name}/>
     </div>
   );
 }

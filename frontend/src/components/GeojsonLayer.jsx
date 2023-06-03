@@ -2,7 +2,7 @@ import React, {useRef, useEffect, useState} from "react";
 import L from "leaflet";
 import Slider from "./Slider";
 
-export default function GeojsonLayer() {
+export default function GeojsonLayer({db_name}) {
     const mapRef = useRef(null);
     const geojsonlayerRef = useRef(null);
     const [data, setData] = useState([]);
@@ -52,7 +52,7 @@ export default function GeojsonLayer() {
         mapRef.current = map;
         geojsonlayerRef.current = new L.LayerGroup().addTo(map);
 
-        fetch("http://192.168.0.171:8000/minmaxts?db_name=ais")
+        fetch(`http://192.168.0.171:8000/minmaxts?db_name=${db_name}`)
             .then((response) => response.json())
             .then((data) => {
                 console.log(data)
@@ -168,7 +168,7 @@ export default function GeojsonLayer() {
 
     useEffect(() => {
         setFetching(true)
-        fetch(`http://192.168.0.171:8000/geojson?limit=${limit}&db_name=ais`).then((res) => res.json()).then((data) => {
+        fetch(`http://192.168.0.171:8000/geojson?limit=${limit}&db_name=${db_name}`).then((res) => res.json()).then((data) => {
             data = clean_data(data);
             setData(data);
             setFetching(false)

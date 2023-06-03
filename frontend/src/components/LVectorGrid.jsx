@@ -165,7 +165,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
 
 });
 
-export default function LVectorGrid() {
+export default function LVectorGrid({db_name}) {
   const mapRef = useRef(null);
   const vectorTileLayerRef = useRef(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -182,6 +182,7 @@ export default function LVectorGrid() {
   const [intervalTime, setIntervalTime] = useState(null)
   const [timestamp, setTimestamp] = useState(0)
   const [minMaxTimestamp, setMinMaxTimestamp] = useState([0, 86000])
+
 
   const options = {
     opacity: 1,
@@ -203,7 +204,7 @@ export default function LVectorGrid() {
   }
 
   async function extractMinMaxTimestamp() {
-    const res = await fetch(`http://192.168.0.171:8000/minmaxts?db_name=ais`).then(res => res.json())
+    const res = await fetch(`http://192.168.0.171:8000/minmaxts?db_name=${db_name}`).then(res => res.json())
     setMinMaxTimestamp([res.min, res.max])
     setTimestamp(res.min)
   }
@@ -242,7 +243,7 @@ export default function LVectorGrid() {
   }, []);
 
   function updateTimez() {
-    const SECOND_PER_UPDATE = 2
+    const SECOND_PER_UPDATE = 10
     setTimestamp((timestamp) => {
       if (timestamp >= minMaxTimestamp[1]) {
         setTimez(new Date(minMaxTimestamp[0] * 1000).toISOString().substr(0, 19).replace('T', ' '))
