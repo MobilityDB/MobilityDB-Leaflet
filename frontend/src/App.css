@@ -1,5 +1,5 @@
 .App {
-  width: 100%;
+  width: 98%;
   height: 100%;
   display: flex;
   position: absolute;
@@ -8,6 +8,7 @@
   background-color: #333333;
   color: #f4f4f4;
   font-family: "Trebuchet MS";
+  padding: 0 1%  ;
 }
 
 .button {
