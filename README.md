@@ -13,7 +13,7 @@ This project consists of two main directories:
 
 ## 🚀 Getting Started 🚀
 
-To get the application running:
+To get the application running, you need to set up the backend server, frontend server, and the `pg_tileserv` for serving map tiles:
 
 ### Backend
 
@@ -28,8 +28,15 @@ To get the application running:
 2. Install the required Node.js packages with `npm install`.
 3. Start the React application with `npm start`.
 
-Now, you should be able to see the application running at `localhost:3000`! 🎉
+### pg_tileserv
 
+`pg_tileserv` is a server that provides map tiles from your PostGIS data.
+
+1. Download and install `pg_tileserv` from its [GitHub repository](https://github.com/CrunchyData/pg_tileserv).
+2. Ensure that `pg_tileserv` is configured to access your PostgreSQL database, which should have the MobilityDB extension installed.
+3. Run `pg_tileserv`.
+
+After setting up all components, you should be able to see the application running at `localhost:3000`! 🎉
 
 ## 📊 Datasets 📊
 
