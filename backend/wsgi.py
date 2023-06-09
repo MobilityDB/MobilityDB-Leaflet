@@ -1,5 +1,4 @@
 import time
-import zlib
 
 from fastapi import FastAPI, Response
 import psycopg2
