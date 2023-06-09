@@ -30,6 +30,18 @@ To get the application running:
 
 Now, you should be able to see the application running at `localhost:3000`! 🎉
 
+
+## 📊 Datasets 📊
+
+This visualization tool can be used with various moving object datasets. Currently, it supports the following dataset:
+
+### AIS Data
+
+Our project uses the AIS (Automatic Identification System) dataset available [here](https://web.ais.dk/aisdata/). The AIS system is used for tracking and identifying marine vessels, providing a wealth of spatio-temporal data. Please visit the link to get access to the AIS data.
+
+If you wish to add support for another dataset, please check out the 'Contributing' section. We'd love to make this tool compatible with more types of moving object data!
+
+
 ## 🤝 Contributing 🤝
 
 This is an open-source project, and contributions are welcome! Feel free to submit a pull request or create an issue. 
@@ -37,3 +49,4 @@ This is an open-source project, and contributions are welcome! Feel free to subm
 ## 📚 License 📚
 
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
+
