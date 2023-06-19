@@ -165,7 +165,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
 
 });
 
-export default function LVectorGrid({db_name}) {
+export default function MVTLayer({db_name}) {
   const mapRef = useRef(null);
   const vectorTileLayerRef = useRef(null);
   const [isUpdating, setIsUpdating] = useState(false);

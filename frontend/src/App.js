@@ -1,17 +1,13 @@
-import logo from './logo.svg';
 import './App.css';
-import LVectorGrid from "./components/LVectorGrid";
-import RLVectorGrid from "./components/RLVectorGrid";
-import {GeoJSON, MapContainer} from "react-leaflet";
+import MVTLayer from "./components/MVTLayer";
 import GeojsonLayer from "./components/GeojsonLayer";
-import TripLayer from "./components/TripLayer";
 import "leaflet/dist/leaflet.css";
 
 function App() {
-  const db_name = "ais"
+  const db_name = "persona"
   return (
     <div className={'App notransition'}>
-      <LVectorGrid db_name={db_name}/>
+      <MVTLayer db_name={db_name}/>
       <GeojsonLayer db_name={db_name}/>
     </div>
   );
