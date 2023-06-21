@@ -319,10 +319,10 @@ export default function MVTLayer({db_name}) {
 
   return (
     <div style={{height: "100%", width: '100%', position: "relative"}}>
-      <h1>VectorGrid</h1>
-      <div id="map_vector_grid" style={{height: "75%", position: "relative"}}></div>
-      <div className={'param-container'}>
-        <div>
+      <div id="map_vector_grid" className={"map-container"} style={{position: "relative"}}></div>
+
+      <div className={'control-panel'}>
+        <div style={{display: "flex", flexDirection: "column"}}>
           <div className={`button `+ (startSimulation ? 'start' : 'stop')} onClick={() => setStartSimulation(!startSimulation)}>
             Start/Stop
           </div>
@@ -333,22 +333,24 @@ export default function MVTLayer({db_name}) {
             reset time
           </div>
         </div>
-        <div>
+        <div style={{display: "flex", flexDirection: "column", minWidth: "70%", justifyContent: "center", justifyItems: "center", alignItems: "center"}}>
           <div>{timez}</div>
           <Slider min={minMaxTimestamp[0]} max={minMaxTimestamp[1]} value={timestamp} onChange={(e) => {
             setTimestamp(parseInt(e.target.value))
             setTimez(new Date(e.target.value * 1000).toISOString().slice(0, 19).replace("T", " "))
           }}/>
-          <input type='number' value={limit} onChange={(e) => setLimit(e.target.value)}/>
         </div>
-        <div>
-          <div>{fps}</div>
-          <div>Average fps: {averageFps}</div>
-        </div>
-        <div>
-          <div>Cached tiles: {cachedWindow}/{cachedWindowMax}</div>
-          <div className={'button'} onClick={() => vectorTileLayerRef.current.clearCache()}>Clear cache</div>
-        </div>
+      </div>
+      <div className={"performance-panel"}>
+        <div>Current fps: {fps}</div>
+        <div>Average fps: {averageFps}</div>
+      </div>
+      <div className={"cached-info"}>
+        <div>Cached tiles: {cachedWindow}/{cachedWindowMax}</div>
+        <div className={'button'} onClick={() => vectorTileLayerRef.current.clearCache()}>Clear cache</div>
+        <br/>
+        <div>Limit of objects:</div>
+        <input type='number' value={limit} onChange={(e) => setLimit(e.target.value)}/>
       </div>
     </div>
   );
