@@ -2,7 +2,7 @@ import React, {useRef, useEffect, useState} from "react";
 import L from "leaflet";
 import Slider from "./Slider";
 
-export default function GeojsonLayer({db_name}) {
+export default function GeojsonLayer({db_name, title}) {
     const mapRef = useRef(null);
     const geojsonlayerRef = useRef(null);
     const [data, setData] = useState([]);
@@ -186,33 +186,39 @@ export default function GeojsonLayer({db_name}) {
 
 
     return (
-        <div style={{height: '100%', width: '100%', position: 'relative'}}>
-            <h1>GeoJSON</h1>
-            <div id="map" style={{height: "75%", position: 'relative'}}></div>
-            <div className={'param-container'}>
-                <div>
-                <div className={`button `+ (startSimulation ? 'start' : 'stop')} onClick={() => setStartSimulation(!startSimulation)}>Start/Stop</div>
-                <div className={'button'} onClick={() => {
-                    setTimestamp(minMaxTimestamp[0])
-                }}>
-                    reset time
-                </div>
-                    </div>
-                <div>
-                <div>{timez}</div>
-                 <Slider min={minMaxTimestamp[0]} max={minMaxTimestamp[1]} value={timestamp} onChange={(e) => {
-                    setTimestamp(parseInt(e.target.value))
-                    setTimez(new Date(e.target.value * 1000).toISOString().slice(0, 19).replace("T", " "))
-                }}/>
-                <input type={"number"} value={limit} onChange={(e) => setLimit(e.target.value)} step={100}/>
-</div>
-                <div>
+      <div style={{height: "100%", width: '100%', position: "relative"}}>
+      <div style={{position: "absolute", top: 15, left: 60, zIndex: 1000, backgroundColor: "rgba(255,255,255,0.9)", padding: "10px", color: "black", fontSize: "24px", fontWeight: "bold", borderRadius: "5px"}}>{title}</div>
+      <div id="map" className={"map-container"} style={{position: "relative"}}></div>
 
-                <div>{fps}</div>
-                <div>Average fps: {averageFps}</div>
-                    </div>
-            </div>
-        </div>)
+      <div className={'control-panel'}>
+        <div style={{display: "flex", flexDirection: "column"}}>
+          <div className={`button `+ (startSimulation ? 'start' : 'stop')} onClick={() => setStartSimulation(!startSimulation)}>
+            Start/Stop
+          </div>
+          <div className={'button'} onClick={() => {
+            new Date(minMaxTimestamp[0] * 1000).toISOString().substr(0, 19).replace('T', ' ');
+            setTimestamp(minMaxTimestamp[0])
+          }}>
+            reset time
+          </div>
+        </div>
+        <div style={{display: "flex", flexDirection: "column", minWidth: "70%", justifyContent: "center", justifyItems: "center", alignItems: "center"}}>
+          <div>{timez}</div>
+          <Slider min={minMaxTimestamp[0]} max={minMaxTimestamp[1]} value={timestamp} onChange={(e) => {
+            setTimestamp(parseInt(e.target.value))
+            setTimez(new Date(e.target.value * 1000).toISOString().slice(0, 19).replace("T", " "))
+          }}/>
+        </div>
+      </div>
+      <div className={"performance-panel"}>
+        <div>Current fps{': '+fps.toString().padStart(3, 0)}</div>
+        <div>Average fps{': ' + averageFps.toString().padStart(3, 0)}</div>
+      </div>
+      <div className={"cached-info"} style={{height: '50px'}}>
+        <div>Limit of objects:</div>
+        <input type='number' value={limit} onChange={(e) => setLimit(e.target.value)}/>
+      </div>
+    </div>)
 
 
 }

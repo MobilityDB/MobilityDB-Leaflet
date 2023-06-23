@@ -165,7 +165,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
 
 });
 
-export default function MVTLayer({db_name}) {
+export default function MVTLayer({db_name, title}) {
   const mapRef = useRef(null);
   const vectorTileLayerRef = useRef(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -319,6 +319,7 @@ export default function MVTLayer({db_name}) {
 
   return (
     <div style={{height: "100%", width: '100%', position: "relative"}}>
+      <div style={{position: "absolute", top: 15, left: 60, zIndex: 1000, backgroundColor: "rgba(255,255,255,0.9)", padding: "10px", color: "black", fontSize: "24px", fontWeight: "bold", borderRadius: "5px"}}>{title}</div>
       <div id="map_vector_grid" className={"map-container"} style={{position: "relative"}}></div>
 
       <div className={'control-panel'}>

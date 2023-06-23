@@ -7,8 +7,8 @@ function App() {
   const db_name = "persona"
   return (
     <div className={'App notransition'}>
-      <MVTLayer db_name={db_name}/>
-      <GeojsonLayer db_name={db_name}/>
+      <MVTLayer db_name={db_name} title={"MVT"}/>
+      <GeojsonLayer db_name={db_name} title={"GeoJSON"}/>
     </div>
   );
 }
