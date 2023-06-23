@@ -33,28 +33,7 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/vectorTiles/{z}/{x}/{y}")
-async def get_vector_tiles(z, x, y, limit=100):
-    t = time.time()
-    cur = con.cursor()
-    cur.execute("select tripsfct(%s, %s, %s, %s)", (z, x, y, limit))
-    asmvt = cur.fetchone()[0]
-    cur.close()
 
-    if asmvt is not None:
-        # Convert memoryview to bytes
-        asmvt_bytes = asmvt.tobytes()
-
-        # Set the content type and headers
-        headers = {
-            "Content-Type": "application/vnd.mapbox-vector-tile",
-            "Access-Control-Allow-Origin": "*"
-        }
-        print("Time taken: ", time.time() - t)
-        # Return the ASMVT byte string as a response with headers
-        return Response(content=asmvt_bytes, headers=headers)
-    else:
-        return Response(content="No data found for this tile", status_code=404)
 
 @app.get("/geojson")
 async def get_geojson(limit=2000, db_name='persona'):
