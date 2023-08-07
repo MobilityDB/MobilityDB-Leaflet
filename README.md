@@ -89,7 +89,8 @@ To get the application running, you need to set up the backend server, frontend 
 
 1. Navigate to the `frontend` directory.
 2. Install the required Node.js packages with `npm install`.
-3. Start the React application with `npm start`.
+3. Ensure that the `local_ip` constant in `App.js` is set to your local IP address
+4. Start the React application with `npm start`.
 
 
 
