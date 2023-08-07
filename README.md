@@ -78,5 +78,5 @@ This is an open-source project, and contributions are welcome! Feel free to subm
 
 ## License
 
-This project is licensed under the PostgreSQL License. See the `LICENSE` file for more details.
+This project is licensed under the [PostgreSQL License](https://www.postgresql.org/about/licence/). See the `LICENSE` file for more details.
 
