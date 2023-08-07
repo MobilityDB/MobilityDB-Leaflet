@@ -165,7 +165,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
 
 });
 
-export default function MVTLayer({db_name, title}) {
+export default function MVTLayer({db_name, title, ip_address}) {
   const mapRef = useRef(null);
   const vectorTileLayerRef = useRef(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -204,7 +204,7 @@ export default function MVTLayer({db_name, title}) {
   }
 
   async function extractMinMaxTimestamp() {
-    const res = await fetch(`http://192.168.0.171:8000/minmaxts?db_name=${db_name}`).then(res => res.json())
+    const res = await fetch(`http://${ip_address}:8000/minmaxts?db_name=${db_name}`).then(res => res.json())
     setMinMaxTimestamp([res.min, res.max])
     setTimestamp(res.min)
   }
@@ -229,7 +229,7 @@ export default function MVTLayer({db_name, title}) {
 
 
     vectorTileLayerRef.current = new L.CustomVectorGrid(
-      `http://192.168.0.171:7802/public.tripsfct/{z}/{x}/{y}.pbf`,
+      `http://${ip_address}:7802/public.tripsfct/{z}/{x}/{y}.pbf`,
       timestamp,
       cachedWindowMax,
       setCachedWindow,
@@ -299,7 +299,7 @@ export default function MVTLayer({db_name, title}) {
   }, [timez, startSimulation]);
 
   useEffect(() => {
-    vectorTileLayerRef.current.setUrl(`http://192.168.0.171:7802/public.tripsfct/{z}/{x}/{y}.pbf?maxpoints=${limit}`, false)
+    vectorTileLayerRef.current.setUrl(`http://${ip_address}:7802/public.tripsfct/{z}/{x}/{y}.pbf?maxpoints=${limit}`, false)
   }, [limit]);
 
   useEffect(() => {
