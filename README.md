@@ -2,7 +2,7 @@
 
 Welcome to the Spatiotemporal Data Visualization Tool, an interactive map for visualizing moving object data from a MobilityDB database! 
 
-This project was created as part of a Master's thesis in Computer Science and makes use of open-source technologies including MobilityDB, PostGIS, Leaflet, React, and FastAPI.
+This project was created as part of a Master's thesis in Computer Science and makes use of open-source technologies including MobilityDB, pg_tileserv, Leaflet, React, and FastAPI.
 
 The master thesis can be found [here](Master_Thesis_Florian_Baudry_2023.pdf).
 
