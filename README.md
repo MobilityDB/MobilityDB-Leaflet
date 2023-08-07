@@ -10,6 +10,13 @@ The master thesis can be found [here](Master_Thesis_Florian_Baudry_2023.pdf).
 https://github.com/MobilityDB/MobilityDB-Leaflet/assets/33914132/de674801-21aa-4543-8b1b-b2dcbbae1602
 
 
+## Main Features
+
+- **Dynamic Visualization**: Our tool offers the possibility to visualize moving objects on an interactive map.
+- **Temporal Control**: Control the time frame for the visualized data, providing options to play, pause, and navigate through time.
+- **Object Filtering**: The tool allows you to limit the number of objects displayed, ensuring efficient visualization.
+- **Dataset Compatibility**: Currently compatible with the AIS dataset, and designed with extendibility for additional datasets.
+
 ## Project Structure
 
 This project consists of two main directories:
