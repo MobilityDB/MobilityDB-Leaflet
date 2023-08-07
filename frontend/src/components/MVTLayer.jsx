@@ -117,8 +117,10 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
 
     var tileUrl = L.Util.template(this._url, L.extend(data, this.options));
     const timestamp = this._timestamp;
+    this._jsons[this._tileCoordsToKey(coords)] = this._jsons[this._tileCoordsToKey(coords)] || {uses: 0, cached: false, lastTimestamp: timestamp, loading: false};
     var _this = this;
-    if (this._jsons[this._tileCoordsToKey(coords)] === undefined || this._jsons[this._tileCoordsToKey(coords)].cached === false) {
+    if ((this._jsons[this._tileCoordsToKey(coords)] === undefined || this._jsons[this._tileCoordsToKey(coords)].cached === false) && this._jsons[this._tileCoordsToKey(coords)].loading === false) {
+      _this._jsons[this._tileCoordsToKey(coords)].loading = true;
       var t = Date.now();
       return fetch(tileUrl, this.options.fetchOptions).then(function (response) {
         if (!response.ok) {
@@ -148,7 +150,7 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
         if (_this._jsons[_this._tileCoordsToKey(coords)] !== undefined) {
           uses = _this._jsons[_this._tileCoordsToKey(coords)].uses += 1;
         }
-        _this._jsons[_this._tileCoordsToKey(coords)] = {json: json, uses: uses, cached: true, lastTimestamp: timestamp};
+        _this._jsons[_this._tileCoordsToKey(coords)] = {json: json, uses: uses, cached: true, lastTimestamp: timestamp, loading: false};
 
 
         return json;
@@ -168,7 +170,6 @@ L.CustomVectorGrid = L.VectorGrid.Protobuf.extend({
 export default function MVTLayer({db_name, title, ip_address}) {
   const mapRef = useRef(null);
   const vectorTileLayerRef = useRef(null);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [startSimulation, setStartSimulation] = useState(false);
   const [cachedWindow, setCachedWindow] = useState(0);
   const [cachedWindowMax, setCachedWindowMax] = useState(10000);
@@ -281,8 +282,8 @@ export default function MVTLayer({db_name, title, ip_address}) {
   }
 
   async function extracted(updateTime = true) {
-    if (!vectorTileLayerRef.current.isLoading() && !isUpdating) {
-      vectorTileLayerRef.current.setTimestamp(timestamp);
+    vectorTileLayerRef.current.setTimestamp(timestamp);
+    if (updateTime) {
       const now = Date.now()
       setFps(Math.round(1000 / (now - currentTime)))
       setCurrentTime(now)
@@ -343,8 +344,8 @@ export default function MVTLayer({db_name, title, ip_address}) {
         </div>
       </div>
       <div className={"performance-panel"}>
-        <div>Current fps: {fps}</div>
-        <div>Average fps: {averageFps}</div>
+        <div>Current fps: {fps.toString().padStart(3, '0')}</div>
+        <div>Average fps: {averageFps.toString().padStart(3, '0')}</div>
       </div>
       <div className={"cached-info"}>
         <div>Cached tiles: {cachedWindow}/{cachedWindowMax}</div>
