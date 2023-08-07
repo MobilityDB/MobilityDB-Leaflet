@@ -7,7 +7,7 @@ This project was created as part of a Master's thesis in Computer Science and ma
 The master thesis can be found [here](Master_Thesis_Florian_Baudry_2023.pdf).
 
 
-https://github.com/MobilityDB/MobilityDB-Leaflet/assets/33914132/db236f21-4de9-4b74-b9ed-5cc4e62b0b5f
+https://github.com/MobilityDB/MobilityDB-Leaflet/assets/33914132/de674801-21aa-4543-8b1b-b2dcbbae1602
 
 
 ## Project Structure
@@ -17,6 +17,13 @@ This project consists of two main directories:
 - `frontend`: This directory contains the React and Leaflet code for the frontend of the application.
 - `backend`: This directory contains a FastAPI server written in Python that communicates with the MobilityDB database.
 
+## Prerequisites
+
+Before you begin, ensure you have met the following requirements:
+
+- You have installed the latest version of Python 3, Node.JS, and PostgreSQL
+- You have a PostgreSQL database with the [MobilityDB](https://github.com/MobilityDB/MobilityDB) extension installed
+
 ## Getting Started
 
 To get the application running, you need to set up the backend server, frontend server, and the `pg_tileserv` for serving map tiles:
@@ -25,14 +32,9 @@ To get the application running, you need to set up the backend server, frontend 
 
 1. Navigate to the `backend` directory.
 2. Install the required Python packages with `pip install -r requirements.txt`.
-3. Modify the .env file to match your database information
-4. Run the FastAPI server with `uvicorn wsgi:app`.
-
-### Frontend
-
-1. Navigate to the `frontend` directory.
-2. Install the required Node.js packages with `npm install`.
-3. Start the React application with `npm start`.
+3. Copy the `.env.dist` file to a `.env` file
+4. Modify the `.env` file to match your database information
+5. Run the FastAPI server with `uvicorn wsgi:app`.
 
 ### pg_tileserv
 
@@ -41,6 +43,14 @@ To get the application running, you need to set up the backend server, frontend 
 1. Download and install `pg_tileserv` from its [GitHub repository](https://github.com/CrunchyData/pg_tileserv).
 2. Ensure that `pg_tileserv` is configured to access your PostgreSQL database, which should have the MobilityDB extension installed.
 3. Run `pg_tileserv`.
+
+### Frontend
+
+1. Navigate to the `frontend` directory.
+2. Install the required Node.js packages with `npm install`.
+3. Start the React application with `npm start`.
+
+
 
 After setting up all components, you should be able to see the application running at `localhost:3000`!
 
