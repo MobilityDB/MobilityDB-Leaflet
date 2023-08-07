@@ -49,7 +49,7 @@ Follow the instructions below to import the AIS dataset:
 
 1. Download your preferred dataset from [AIS](https://web.ais.dk/aisdata/).
 2. Create a database named `ais`.
-3. Add the `input_ais()` function to this database. This function can be found in the [function.sql](function.sql) file. ⚠️ Be sure to modify the line `FROM '/mnt/g/ais_datasets/aisdk-2023-05-23/aisdk-2023-05-23.csv' DELIMITER ',' CSV HEADER;` to point to the correct location of the downloaded file.
+3. Add the `input_ais()` function to this database. This function can be found in the [functions.sql](functions.sql) file. ⚠️ Be sure to modify the line `FROM '/mnt/g/ais_datasets/aisdk-2023-05-23/aisdk-2023-05-23.csv' DELIMITER ',' CSV HEADER;` to point to the correct location of the downloaded file.
 4. Execute the function.
 
 Your data should now be imported!
@@ -58,7 +58,7 @@ To ensure compatibility with pg_tileserv, some modifications to your database ar
 
 1. Create a new column named `trip_3857` of the type `tgeompoint`.
 2. Execute the following command: `update ships set trip_3857 = transform(trip, 3857);`. This command creates a column with the appropriate projection.
-3. Add the `tripsfct` function to your database. This function can also be found in the [function.sql](function.sql) file.
+3. Add the `tripsfct` function to your database. This function can also be found in the [functions.sql](functions.sql) file.
 
 After setting up pg_tileserv, you should be able to see the new function in the GUI of pg_tileserv (which runs by default on port 7802).
 
