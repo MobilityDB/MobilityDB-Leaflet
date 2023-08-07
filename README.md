@@ -4,7 +4,11 @@ Welcome to the Spatiotemporal Data Visualization Tool, an interactive map for vi
 
 This project was created as part of a Master's thesis in Computer Science and makes use of open-source technologies including MobilityDB, PostGIS, Leaflet, React, and FastAPI.
 
-The master thesis can be found [here]("./Master_Thesis_Florian_Baudry_2023.pdf").
+The master thesis can be found [here](Master_Thesis_Florian_Baudry_2023.pdf).
+
+
+https://github.com/MobilityDB/MobilityDB-Leaflet/assets/33914132/db236f21-4de9-4b74-b9ed-5cc4e62b0b5f
+
 
 ## Project Structure
 
