@@ -29,7 +29,7 @@ This project consists of two main directories:
 Before you begin, ensure you have met the following requirements:
 
 - You have installed the latest version of Python 3, Node.JS, and PostgreSQL
-- You have a PostgreSQL database with the [MobilityDB](https://github.com/MobilityDB/MobilityDB) extension installed
+- You have a PostgreSQL database with the PostGIS and [MobilityDB](https://github.com/MobilityDB/MobilityDB) extensions installed
 
 
 ## Datasets
@@ -42,24 +42,19 @@ Our project uses the AIS (Automatic Identification System) dataset available [he
 
 If you wish to add support for another dataset, please check out the 'Contributing' section. We'd love to make this tool compatible with more types of moving object data!
 
-#### Import the Data
 
-Here are the instructions to import the data for the AIS dataset
+#### Importing the AIS Dataset
 
-1. Download any data from [AIS](https://web.ais.dk/aisdata/).
-2. Create a database named `ais`
-3. Add the function `input_ais()` to this database (the function can be found in the [function.sql](function.sql) file). ⚠️ Make sure to modify the line `FROM '/mnt/g/ais_datasets/aisdk-2023-05-23/aisdk-2023-05-23.csv' DELIMITER ',' CSV HEADER;` to point to the good location of the file
-4. Execute the function 
+Follow the instructions below to import the AIS dataset:
 
-Now the data are imported !
+1. Download your preferred dataset from [AIS](https://web.ais.dk/aisdata/).
+2. Create a database named `ais`.
+3. Add the `input_ais()` function to this database. This function can be found in the [functions.sql](functions.sql) file. ⚠️ Be sure to modify the line `FROM '/mnt/g/ais_datasets/aisdk-2023-05-23/aisdk-2023-05-23.csv' DELIMITER ',' CSV HEADER;` to point to the correct location of the downloaded file.
+4. Execute the function.
 
-To be able to use them using pg_tileserv, you need to make some modifications to your database:
+Your data should now be imported!
 
-1. Create a column `trip_3857` of type `tgeompoint`
-2. Dxecute the following command: `update ships set trip_3857 = transform(trip, 3857);`. This will create a column with the good projection
-3. Add the function `tripsfct` into your database (the function can be found in the [function.sql](function.sql) file).
-
-After the setup of pg_tilserv, you should see the function in the GUI of pg_tileserv (run by default on port 7800)
+After setting up pg_tileserv, you should be able to see the new function in the GUI of pg_tileserv (which runs by default on port 7802).
 
 ![image](https://github.com/MobilityDB/MobilityDB-Leaflet/assets/33914132/3a6cb2f5-9d95-450b-be21-f655541d5a08)
 
@@ -82,7 +77,7 @@ To get the application running, you need to set up the backend server, frontend 
 `pg_tileserv` is a server that provides map tiles from your PostGIS data.
 
 1. Download and install `pg_tileserv` from its [GitHub repository](https://github.com/CrunchyData/pg_tileserv).
-2. Ensure that `pg_tileserv` is configured to access your PostgreSQL database, which should have the MobilityDB extension installed.
+2. Ensure that `pg_tileserv` is configured to access your PostgreSQL database, which should have the PostGIS and MobilityDB extensions installed.
 3. Run `pg_tileserv`.
 
 ### Frontend
