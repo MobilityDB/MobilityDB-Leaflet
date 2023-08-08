@@ -29,7 +29,7 @@ This project consists of two main directories:
 Before you begin, ensure you have met the following requirements:
 
 - You have installed the latest version of Python 3, Node.JS, and PostgreSQL
-- You have a PostgreSQL database with the [MobilityDB](https://github.com/MobilityDB/MobilityDB) extension installed
+- You have a PostgreSQL database with the PostGIS and [MobilityDB](https://github.com/MobilityDB/MobilityDB) extensions installed
 
 
 ## Datasets
@@ -77,7 +77,7 @@ To get the application running, you need to set up the backend server, frontend 
 `pg_tileserv` is a server that provides map tiles from your PostGIS data.
 
 1. Download and install `pg_tileserv` from its [GitHub repository](https://github.com/CrunchyData/pg_tileserv).
-2. Ensure that `pg_tileserv` is configured to access your PostgreSQL database, which should have the MobilityDB extension installed.
+2. Ensure that `pg_tileserv` is configured to access your PostgreSQL database, which should have the PostGIS and MobilityDB extensions installed.
 3. Run `pg_tileserv`.
 
 ### Frontend
