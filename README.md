@@ -7,8 +7,7 @@ This project was created as part of a Master's thesis in Computer Science and ma
 The master thesis can be found [here](Master_Thesis_Florian_Baudry_2023.pdf).
 
 
-https://github.com/MobilityDB/MobilityDB-Leaflet/assets/33914132/326aa19a-b053-497d-b561-dd31099fe0bd
-
+![MobilityDB_Leaflet](https://github.com/MobilityDB/MobilityDB-Leaflet/assets/33914132/df4d6497-65f9-4fbc-9b60-c591aab4bc02)
 
 ## Main Features
 
