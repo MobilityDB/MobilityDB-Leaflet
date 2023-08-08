@@ -98,8 +98,8 @@ BEGIN
   -- FROM AISInputFiltered
   -- GROUP BY MMSI;
 
-  DROP TABLE IF EXISTS Ships7;
-  CREATE TABLE Ships7(MMSI, Trip) AS
+  DROP TABLE IF EXISTS Ships;
+  CREATE TABLE Ships(MMSI, Trip) AS
   SELECT MMSI, tgeompoint_seqset_gaps(
     array_agg(tgeompoint_inst(ST_Transform(Geom, 25832), T) ORDER BY T),
     interval '1 hour')
@@ -107,11 +107,11 @@ BEGIN
   GROUP BY MMSI;
 
   ALTER TABLE Ships7 ADD COLUMN Traj geometry;
-  UPDATE Ships7 SET Traj = trajectory(Trip);
+  UPDATE Ships SET Traj = trajectory(Trip);
 
-    alter table ships7 add column trip_3857 tgeompoint;
-    update ships7 set trip_3857 = transform(trip, 3857);
-    update ships7 set trip = transform(trip, 4326);
+    alter table ships add column trip_3857 tgeompoint;
+    update ships set trip_3857 = transform(trip, 3857);
+    update ships set trip = transform(trip, 4326);
 
   RETURN 'The End';
 END;
