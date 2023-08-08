@@ -59,7 +59,7 @@ To be able to use them using pg_tileserv, you need to make some modifications to
 2. Dxecute the following command: `update ships set trip_3857 = transform(trip, 3857);`. This will create a column with the good projection
 3. Add the function `tripsfct` into your database (the function can be found in the [function.sql](function.sql) file).
 
-After the setup of pg_tilserv, you should see the function in the GUI of pg_tileserv (run by default on port 7802)
+After the setup of pg_tilserv, you should see the function in the GUI of pg_tileserv (run by default on port 7800)
 
 ![image](https://github.com/MobilityDB/MobilityDB-Leaflet/assets/33914132/3a6cb2f5-9d95-450b-be21-f655541d5a08)
 

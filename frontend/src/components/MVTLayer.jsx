@@ -230,7 +230,7 @@ export default function MVTLayer({db_name, title, ip_address}) {
 
 
     vectorTileLayerRef.current = new L.CustomVectorGrid(
-      `http://${ip_address}:7802/public.tripsfct/{z}/{x}/{y}.pbf`,
+      `http://${ip_address}:7800/public.tripsfct/{z}/{x}/{y}.pbf`,
       timestamp,
       cachedWindowMax,
       setCachedWindow,
@@ -300,7 +300,7 @@ export default function MVTLayer({db_name, title, ip_address}) {
   }, [timez, startSimulation]);
 
   useEffect(() => {
-    vectorTileLayerRef.current.setUrl(`http://${ip_address}:7802/public.tripsfct/{z}/{x}/{y}.pbf?maxpoints=${limit}`, false)
+    vectorTileLayerRef.current.setUrl(`http://${ip_address}:7800/public.tripsfct/{z}/{x}/{y}.pbf?maxpoints=${limit}`, false)
   }, [limit]);
 
   useEffect(() => {
