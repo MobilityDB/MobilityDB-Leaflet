@@ -54,12 +54,6 @@ Follow the instructions below to import the AIS dataset:
 
 Your data should now be imported!
 
-To ensure compatibility with pg_tileserv, some modifications to your database are necessary:
-
-1. Create a new column named `trip_3857` of the type `tgeompoint`.
-2. Execute the following command: `update ships set trip_3857 = transform(trip, 3857);`. This command creates a column with the appropriate projection.
-3. Add the `tripsfct` function to your database. This function can also be found in the [functions.sql](functions.sql) file.
-
 After setting up pg_tileserv, you should be able to see the new function in the GUI of pg_tileserv (which runs by default on port 7802).
 
 ![image](https://github.com/MobilityDB/MobilityDB-Leaflet/assets/33914132/3a6cb2f5-9d95-450b-be21-f655541d5a08)
