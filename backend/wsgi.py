@@ -8,13 +8,6 @@ import json
 
 
 load_dotenv()
-con_persona = psycopg2.connect(
-    host=os.getenv("DB_HOST"),
-    database='persona_small',
-    user=os.getenv("DB_USER"),
-    password=os.getenv("DB_PASSWORD"),
-    port=os.getenv("DB_PORT")
-)
 
 con_ais = psycopg2.connect(
     host=os.getenv("DB_HOST"),
@@ -37,16 +30,11 @@ async def root():
 
 @app.get("/geojson")
 async def get_geojson(limit=2000, db_name='persona'):
-    if db_name == 'persona':
-        cur = con_persona.cursor()
-        table_name = 'persona_small_4000'
-        column_name = 'fullday_trajectory'
-        order_by = 'ORDER BY id'
-    else:
-        cur = con_ais.cursor()
-        table_name = 'ships'
-        column_name = 'trip'
-        order_by = 'ORDER BY mmsi'
+    
+    cur = con_ais.cursor()
+    table_name = 'ships'
+    column_name = 'trip'
+    order_by = 'ORDER BY mmsi'
     url = f'WITH trips as (SELECT {column_name} as col FROM {table_name} {order_by} LIMIT %s)SELECT asMFJSON(transform(col, 4326))::json FROM trips  LIMIT %s'
     cur.execute(url, (limit, limit,))
     geojson = cur.fetchall()
@@ -57,14 +45,9 @@ async def get_geojson(limit=2000, db_name='persona'):
 
 @app.get("/minmaxts")
 async def get_minmaxts(db_name='persona'):
-    if db_name == 'persona':
-        cur = con_persona.cursor()
-        table_name = 'persona_small_4000'
-        column_name = 'fullday_trajectory'
-    else:
-        cur = con_ais.cursor()
-        table_name = 'ships'
-        column_name = 'trip'
+    cur = con_ais.cursor()
+    table_name = 'ships'
+    column_name = 'trip'
     url = f'SELECT extract(EPOCH from MIN(tmin({column_name}::stbox))), extract(epoch from MAX(tmax({column_name}::stbox))) FROM {table_name};'
     cur.execute(url)
     minmaxts = cur.fetchone()
